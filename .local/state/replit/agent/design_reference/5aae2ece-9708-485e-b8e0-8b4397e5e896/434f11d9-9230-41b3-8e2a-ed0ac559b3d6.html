@@ -1,0 +1,515 @@
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DataFlow - Project Management Automation</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        'sans': ['Inter', 'system-ui', 'sans-serif'],
+                    },
+                    colors: {
+                        primary: '#1565C0',
+                        secondary: '#424242',
+                        accent: '#00C853',
+                        neutral: '#F5F5F5',
+                        error: '#FF5722',
+                        warning: '#FFC107',
+                        success: '#4CAF50'
+                    }
+                }
+            }
+        };
+    </script>
+</head>
+<body class="bg-neutral font-sans text-secondary">
+    <!-- @COMPONENT: Header -->
+    <header class="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <h1 class="text-2xl font-bold text-primary">DataFlow</h1>
+                        <p class="text-xs text-gray-500">Project Automation Platform</p>
+                    </div>
+                </div>
+                <nav class="hidden md:flex space-x-8">
+                    <a href="#" class="text-primary border-b-2 border-primary px-1 pb-4 text-sm font-medium">Dashboard</a>
+                    <a href="#" class="text-gray-500 hover:text-gray-700 px-1 pb-4 text-sm font-medium">Reports</a>
+                    <a href="#" class="text-gray-500 hover:text-gray-700 px-1 pb-4 text-sm font-medium">Analytics</a>
+                    <a href="#" class="text-gray-500 hover:text-gray-700 px-1 pb-4 text-sm font-medium">Settings</a>
+                </nav>
+                <div class="flex items-center space-x-4">
+                    <button class="bg-primary text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-blue-700 transition-colors">
+                        <i class="fas fa-plus mr-2"></i>New Report
+                    </button>
+                    <div class="relative">
+                        <button class="flex items-center text-sm rounded-full focus:outline-none focus:ring-2 focus:ring-primary">
+                            <img class="h-8 w-8 rounded-full" src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-4.0.3&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80" alt="User avatar">
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+    <!-- @END_COMPONENT: Header -->
+
+    <div class="flex h-screen pt-16">
+        <!-- @COMPONENT: Sidebar -->
+        <aside class="w-64 bg-white shadow-sm border-r border-gray-200 fixed left-0 top-16 h-full overflow-y-auto">
+            <div class="p-6">
+                <div class="mb-8">
+                    <h3 class="text-sm font-semibold text-gray-900 uppercase tracking-wider mb-4">Integrations</h3>
+                    <div class="space-y-3">
+                        <div class="flex items-center justify-between p-3 bg-green-50 border border-green-200 rounded-lg">
+                            <div class="flex items-center">
+                                <div class="w-8 h-8 bg-blue-600 rounded flex items-center justify-center mr-3">
+                                    <i class="fab fa-jira text-white text-sm"></i>
+                                </div>
+                                <div>
+                                    <p class="text-sm font-medium text-gray-900">Jira</p>
+                                    <p class="text-xs text-gray-500">Connected</p>
+                                </div>
+                            </div>
+                            <div class="w-2 h-2 bg-accent rounded-full"></div>
+                        </div>
+                        
+                        <div class="flex items-center justify-between p-3 bg-green-50 border border-green-200 rounded-lg">
+                            <div class="flex items-center">
+                                <div class="w-8 h-8 bg-blue-500 rounded flex items-center justify-center mr-3">
+                                    <i class="fab fa-trello text-white text-sm"></i>
+                                </div>
+                                <div>
+                                    <p class="text-sm font-medium text-gray-900">Trello</p>
+                                    <p class="text-xs text-gray-500">Connected</p>
+                                </div>
+                            </div>
+                            <div class="w-2 h-2 bg-accent rounded-full"></div>
+                        </div>
+                        
+                        <div class="flex items-center justify-between p-3 bg-gray-50 border border-gray-200 rounded-lg">
+                            <div class="flex items-center">
+                                <div class="w-8 h-8 bg-red-500 rounded flex items-center justify-center mr-3">
+                                    <i class="fas fa-check text-white text-sm"></i>
+                                </div>
+                                <div>
+                                    <p class="text-sm font-medium text-gray-900">Asana</p>
+                                    <p class="text-xs text-gray-500">Not Connected</p>
+                                </div>
+                            </div>
+                            <button class="text-primary hover:text-blue-700">
+                                <i class="fas fa-plus text-sm"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mb-8">
+                    <h3 class="text-sm font-semibold text-gray-900 uppercase tracking-wider mb-4">Quick Actions</h3>
+                    <div class="space-y-2">
+                        <button class="w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded-md">
+                            <i class="fas fa-chart-line mr-3 text-gray-400"></i>Generate Report
+                        </button>
+                        <button class="w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded-md">
+                            <i class="fas fa-clock mr-3 text-gray-400"></i>Schedule Automation
+                        </button>
+                        <button class="w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded-md">
+                            <i class="fas fa-download mr-3 text-gray-400"></i>Export Data
+                        </button>
+                        <button class="w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded-md">
+                            <i class="fas fa-cog mr-3 text-gray-400"></i>Configure Templates
+                        </button>
+                    </div>
+                </div>
+
+                <div>
+                    <h3 class="text-sm font-semibold text-gray-900 uppercase tracking-wider mb-4">Recent Reports</h3>
+                    <div class="space-y-3">
+                        <div class="p-3 bg-gray-50 rounded-lg">
+                            <p class="text-sm font-medium text-gray-900">Weekly Sprint Report</p>
+                            <p class="text-xs text-gray-500">2 hours ago</p>
+                        </div>
+                        <div class="p-3 bg-gray-50 rounded-lg">
+                            <p class="text-sm font-medium text-gray-900">Team Velocity Analysis</p>
+                            <p class="text-xs text-gray-500">1 day ago</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </aside>
+        <!-- @END_COMPONENT: Sidebar -->
+
+        <!-- @COMPONENT: MainContent -->
+        <main class="flex-1 ml-64 p-8 overflow-y-auto">
+            <!-- Dashboard Overview -->
+            <div class="mb-8">
+                <div class="flex justify-between items-center mb-6">
+                    <div>
+                        <h2 class="text-3xl font-bold text-gray-900">Dashboard Overview</h2>
+                        <p class="text-gray-600">Monitor your team's progress and project health</p>
+                    </div>
+                    <div class="flex space-x-3">
+                        <select class="border border-gray-300 rounded-md px-3 py-2 text-sm">
+                            <option>Last 7 days</option>
+                            <option>Last 30 days</option>
+                            <option>Last 90 days</option>
+                        </select>
+                        <button class="bg-white border border-gray-300 text-gray-700 px-4 py-2 rounded-md text-sm hover:bg-gray-50">
+                            <i class="fas fa-sync-alt mr-2"></i>Refresh
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Key Metrics Cards -->
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                    <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-sm font-medium text-gray-600">Active Projects</p>
+                                <p class="text-3xl font-bold text-gray-900">12</p>
+                                <p class="text-sm text-accent">↑ 2 from last week</p>
+                            </div>
+                            <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
+                                <i class="fas fa-project-diagram text-primary text-xl"></i>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-sm font-medium text-gray-600">Tasks Completed</p>
+                                <p class="text-3xl font-bold text-gray-900">247</p>
+                                <p class="text-sm text-accent">↑ 18% this week</p>
+                            </div>
+                            <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
+                                <i class="fas fa-check-circle text-success text-xl"></i>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-sm font-medium text-gray-600">Team Velocity</p>
+                                <p class="text-3xl font-bold text-gray-900">42</p>
+                                <p class="text-sm text-accent">Points per sprint</p>
+                            </div>
+                            <div class="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
+                                <i class="fas fa-tachometer-alt text-purple-600 text-xl"></i>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-sm font-medium text-gray-600">Overdue Tasks</p>
+                                <p class="text-3xl font-bold text-gray-900">8</p>
+                                <p class="text-sm text-error">Needs attention</p>
+                            </div>
+                            <div class="w-12 h-12 bg-red-100 rounded-lg flex items-center justify-center">
+                                <i class="fas fa-exclamation-triangle text-error text-xl"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Charts and Analytics -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+                <!-- Velocity Chart -->
+                <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 class="text-lg font-semibold text-gray-900">Team Velocity Trend</h3>
+                        <select class="border border-gray-300 rounded px-2 py-1 text-sm">
+                            <option>Last 6 sprints</option>
+                            <option>Last 12 sprints</option>
+                        </select>
+                    </div>
+                    <div class="h-64">
+                        <canvas id="velocityChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Project Health -->
+                <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
+                    <h3 class="text-lg font-semibold text-gray-900 mb-4">Project Health Overview</h3>
+                    <div class="space-y-4">
+                        <div class="flex justify-between items-center">
+                            <span class="text-sm font-medium text-gray-700">Data Pipeline Redesign</span>
+                            <div class="flex items-center space-x-2">
+                                <div class="w-24 bg-gray-200 rounded-full h-2">
+                                    <div class="bg-accent h-2 rounded-full" style="width: 85%"></div>
+                                </div>
+                                <span class="text-sm text-gray-600">85%</span>
+                            </div>
+                        </div>
+                        
+                        <div class="flex justify-between items-center">
+                            <span class="text-sm font-medium text-gray-700">Analytics Dashboard</span>
+                            <div class="flex items-center space-x-2">
+                                <div class="w-24 bg-gray-200 rounded-full h-2">
+                                    <div class="bg-warning h-2 rounded-full" style="width: 60%"></div>
+                                </div>
+                                <span class="text-sm text-gray-600">60%</span>
+                            </div>
+                        </div>
+                        
+                        <div class="flex justify-between items-center">
+                            <span class="text-sm font-medium text-gray-700">API Integration</span>
+                            <div class="flex items-center space-x-2">
+                                <div class="w-24 bg-gray-200 rounded-full h-2">
+                                    <div class="bg-success h-2 rounded-full" style="width: 95%"></div>
+                                </div>
+                                <span class="text-sm text-gray-600">95%</span>
+                            </div>
+                        </div>
+                        
+                        <div class="flex justify-between items-center">
+                            <span class="text-sm font-medium text-gray-700">ML Model Training</span>
+                            <div class="flex items-center space-x-2">
+                                <div class="w-24 bg-gray-200 rounded-full h-2">
+                                    <div class="bg-error h-2 rounded-full" style="width: 30%"></div>
+                                </div>
+                                <span class="text-sm text-gray-600">30%</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Report Generation Section -->
+            <div class="bg-white rounded-lg shadow-sm border border-gray-200 mb-8">
+                <div class="p-6 border-b border-gray-200">
+                    <h3 class="text-lg font-semibold text-gray-900">Generate Weekly Report</h3>
+                    <p class="text-gray-600">Create automated progress reports from your connected tools</p>
+                </div>
+                <div class="p-6">
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Report Template</label>
+                            <select class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm">
+                                <option>Weekly Sprint Summary</option>
+                                <option>Team Performance Analysis</option>
+                                <option>Project Health Report</option>
+                                <option>Custom Template</option>
+                            </select>
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Date Range</label>
+                            <select class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm">
+                                <option>Last 7 days</option>
+                                <option>Last 14 days</option>
+                                <option>Last 30 days</option>
+                                <option>Custom Range</option>
+                            </select>
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Export Format</label>
+                            <div class="flex space-x-2">
+                                <button class="flex-1 bg-gray-100 text-gray-700 px-3 py-2 rounded-md text-sm hover:bg-gray-200">
+                                    <i class="fas fa-file-pdf mr-2"></i>PDF
+                                </button>
+                                <button class="flex-1 bg-gray-100 text-gray-700 px-3 py-2 rounded-md text-sm hover:bg-gray-200">
+                                    <i class="fas fa-file-excel mr-2"></i>Excel
+                                </button>
+                                <button class="flex-1 bg-gray-100 text-gray-700 px-3 py-2 rounded-md text-sm hover:bg-gray-200">
+                                    <i class="fas fa-code mr-2"></i>JSON
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-6 flex justify-between items-center">
+                        <div class="flex items-center space-x-4">
+                            <label class="flex items-center">
+                                <input type="checkbox" class="rounded border-gray-300 text-primary focus:ring-primary" checked>
+                                <span class="ml-2 text-sm text-gray-700">Include charts and visualizations</span>
+                            </label>
+                            <label class="flex items-center">
+                                <input type="checkbox" class="rounded border-gray-300 text-primary focus:ring-primary">
+                                <span class="ml-2 text-sm text-gray-700">Send via email</span>
+                            </label>
+                        </div>
+                        <button class="bg-primary text-white px-6 py-2 rounded-md hover:bg-blue-700 transition-colors">
+                            <i class="fas fa-play mr-2"></i>Generate Report
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recent Activity and Alerts -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                <!-- Recent Activity -->
+                <div class="bg-white rounded-lg shadow-sm border border-gray-200">
+                    <div class="p-6 border-b border-gray-200">
+                        <h3 class="text-lg font-semibold text-gray-900">Recent Activity</h3>
+                    </div>
+                    <div class="p-6">
+                        <div class="space-y-4">
+                            <div class="flex items-start space-x-3">
+                                <div class="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
+                                    <i class="fas fa-check text-success text-sm"></i>
+                                </div>
+                                <div class="flex-1">
+                                    <p class="text-sm font-medium text-gray-900">Report generated successfully</p>
+                                    <p class="text-xs text-gray-500">Weekly Sprint Summary - 2 hours ago</p>
+                                </div>
+                            </div>
+                            
+                            <div class="flex items-start space-x-3">
+                                <div class="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+                                    <i class="fas fa-sync text-primary text-sm"></i>
+                                </div>
+                                <div class="flex-1">
+                                    <p class="text-sm font-medium text-gray-900">Data sync completed</p>
+                                    <p class="text-xs text-gray-500">Jira integration - 4 hours ago</p>
+                                </div>
+                            </div>
+                            
+                            <div class="flex items-start space-x-3">
+                                <div class="w-8 h-8 bg-yellow-100 rounded-full flex items-center justify-center">
+                                    <i class="fas fa-exclamation text-warning text-sm"></i>
+                                </div>
+                                <div class="flex-1">
+                                    <p class="text-sm font-medium text-gray-900">API rate limit reached</p>
+                                    <p class="text-xs text-gray-500">Trello integration - 6 hours ago</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Scheduled Reports -->
+                <div class="bg-white rounded-lg shadow-sm border border-gray-200">
+                    <div class="p-6 border-b border-gray-200 flex justify-between items-center">
+                        <h3 class="text-lg font-semibold text-gray-900">Scheduled Automations</h3>
+                        <button class="text-primary hover:text-blue-700 text-sm">
+                            <i class="fas fa-plus mr-1"></i>Add Schedule
+                        </button>
+                    </div>
+                    <div class="p-6">
+                        <div class="space-y-4">
+                            <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                                <div>
+                                    <p class="text-sm font-medium text-gray-900">Weekly Sprint Report</p>
+                                    <p class="text-xs text-gray-500">Every Monday at 9:00 AM</p>
+                                </div>
+                                <div class="flex items-center space-x-2">
+                                    <div class="w-2 h-2 bg-accent rounded-full"></div>
+                                    <span class="text-xs text-gray-500">Active</span>
+                                </div>
+                            </div>
+                            
+                            <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                                <div>
+                                    <p class="text-sm font-medium text-gray-900">Monthly Performance Review</p>
+                                    <p class="text-xs text-gray-500">1st of every month at 8:00 AM</p>
+                                </div>
+                                <div class="flex items-center space-x-2">
+                                    <div class="w-2 h-2 bg-accent rounded-full"></div>
+                                    <span class="text-xs text-gray-500">Active</span>
+                                </div>
+                            </div>
+                            
+                            <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                                <div>
+                                    <p class="text-sm font-medium text-gray-900">Daily Standup Summary</p>
+                                    <p class="text-xs text-gray-500">Every weekday at 8:30 AM</p>
+                                </div>
+                                <div class="flex items-center space-x-2">
+                                    <div class="w-2 h-2 bg-gray-400 rounded-full"></div>
+                                    <span class="text-xs text-gray-500">Paused</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+        <!-- @END_COMPONENT: MainContent -->
+    </div>
+
+    <script>
+        // TODO: Implement business logic, API calls, and state management
+        (function() {
+            // Initialize velocity chart
+            const ctx = document.getElementById('velocityChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: ['Sprint 1', 'Sprint 2', 'Sprint 3', 'Sprint 4', 'Sprint 5', 'Sprint 6'],
+                    datasets: [{
+                        label: 'Story Points Completed',
+                        data: [32, 45, 38, 52, 46, 42],
+                        borderColor: '#1565C0',
+                        backgroundColor: 'rgba(21, 101, 192, 0.1)',
+                        tension: 0.4,
+                        fill: true
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            grid: {
+                                color: 'rgba(0, 0, 0, 0.05)'
+                            }
+                        },
+                        x: {
+                            grid: {
+                                color: 'rgba(0, 0, 0, 0.05)'
+                            }
+                        }
+                    }
+                }
+            });
+
+            // Mock API integration status updates
+            const integrationStatuses = document.querySelectorAll('[data-mock="integration-status"]');
+            
+            // Simulate real-time updates for demonstration
+            setInterval(() => {
+                // This would connect to real APIs in production
+                console.log('Checking integration health...');
+            }, 30000);
+
+            // Report generation simulation
+            document.querySelector('button[data-event="generate-report"]')?.addEventListener('click', function() {
+                // TODO: Implement actual report generation logic
+                this.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Generating...';
+                this.disabled = true;
+                
+                setTimeout(() => {
+                    this.innerHTML = '<i class="fas fa-check mr-2"></i>Report Generated';
+                    this.classList.add('bg-success');
+                    this.classList.remove('bg-primary');
+                    
+                    setTimeout(() => {
+                        this.innerHTML = '<i class="fas fa-play mr-2"></i>Generate Report';
+                        this.classList.remove('bg-success');
+                        this.classList.add('bg-primary');
+                        this.disabled = false;
+                    }, 2000);
+                }, 3000);
+            });
+        })();
+    </script>
+</body>
+</html>

@@ -1,0 +1,578 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GemCert - Professional Gemstone Certificate Management</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#1e40af',
+                        secondary: '#64748b',
+                        accent: '#059669',
+                        neutral: '#f8fafc'
+                    },
+                    fontFamily: {
+                        'inter': ['Inter', 'system-ui', 'sans-serif']
+                    }
+                }
+            }
+        }
+    </script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="font-inter bg-neutral min-h-screen">
+    <!-- @COMPONENT: Header Navigation -->
+    <header class="bg-white shadow-lg border-b border-gray-200">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <div class="flex items-center space-x-4">
+                    <div class="flex items-center space-x-2">
+                        <i class="fas fa-gem text-primary text-2xl"></i>
+                        <h1 class="text-2xl font-bold text-slate-900">GemCert</h1>
+                    </div>
+                    <span class="text-secondary text-sm">Professional Certificate Management</span>
+                </div>
+                <nav class="hidden md:flex space-x-6">
+                    <a href="#search" class="text-slate-700 hover:text-primary font-medium transition-colors" data-event="click:showSearchView">Certificate Lookup</a>
+                    <a href="#about" class="text-slate-700 hover:text-primary font-medium transition-colors">About</a>
+                    <a href="#contact" class="text-slate-700 hover:text-primary font-medium transition-colors">Contact</a>
+                    <button class="bg-primary text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors font-medium" data-event="click:showAdminLogin">
+                        <i class="fas fa-lock mr-2"></i>Admin Access
+                    </button>
+                </nav>
+                <button class="md:hidden text-slate-600" data-event="click:toggleMobileMenu">
+                    <i class="fas fa-bars text-xl"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+    <!-- @END_COMPONENT: Header Navigation -->
+
+    <!-- @COMPONENT: Main Application Container -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        
+        <!-- @COMPONENT: Public Certificate Search Section -->
+        <section id="search-section" class="mb-12">
+            <div class="text-center mb-8">
+                <h2 class="text-4xl font-bold text-slate-900 mb-4">Certificate Lookup</h2>
+                <p class="text-xl text-secondary max-w-2xl mx-auto">Enter your certificate number to view detailed gemstone information and authenticity verification.</p>
+            </div>
+
+            <!-- Search Form -->
+            <div class="max-w-md mx-auto mb-8">
+                <form class="space-y-4" data-event="submit:handleCertificateSearch">
+                    <div class="relative">
+                        <label for="certificateNumber" class="block text-sm font-medium text-slate-700 mb-2">Certificate Number</label>
+                        <input 
+                            type="text" 
+                            id="certificateNumber" 
+                            name="certificateNumber" 
+                            placeholder="e.g., GC-2024-001234"
+                            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
+                            data-bind="searchForm.certificateNumber"
+                            data-mock="true"
+                        >
+                        <i class="fas fa-search absolute right-3 top-10 text-gray-400"></i>
+                    </div>
+                    <button 
+                        type="submit" 
+                        class="w-full bg-primary text-white py-3 px-6 rounded-lg hover:bg-blue-700 transition-colors font-medium flex items-center justify-center"
+                        data-implementation="Should validate certificate number format before search"
+                    >
+                        <i class="fas fa-search mr-2"></i>
+                        Search Certificate
+                    </button>
+                </form>
+            </div>
+
+            <!-- Search Results Display -->
+            <div id="search-results" class="hidden" data-bind="searchResults.isVisible">
+                <!-- @COMPONENT: Certificate Display Card -->
+                <div class="bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden max-w-4xl mx-auto">
+                    <div class="bg-gradient-to-r from-primary to-blue-600 text-white p-6">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <h3 class="text-2xl font-bold" data-bind="certificate.title" data-mock="true">Certified Natural Diamond</h3>
+                                <p class="text-blue-100 mt-1" data-bind="certificate.number" data-mock="true">Certificate #GC-2024-001234</p>
+                            </div>
+                            <div class="text-right">
+                                <div class="text-sm text-blue-100">Issue Date</div>
+                                <div class="font-semibold" data-bind="certificate.issueDate" data-mock="true">March 15, 2024</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="p-6">
+                        <div class="grid md:grid-cols-2 gap-8">
+                            <!-- Gemstone Image -->
+                            <div class="space-y-4">
+                                <!-- A brilliant cut diamond with exceptional clarity and sparkle on white background -->
+                                <img 
+                                    src="https://images.unsplash.com/photo-1605100804763-247f67b3557e?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=800&h=600" 
+                                    alt="Certified gemstone" 
+                                    class="w-full h-64 object-cover rounded-lg border"
+                                    data-bind="certificate.image"
+                                    data-mock-image="true"
+                                >
+                                <button class="w-full bg-gray-100 hover:bg-gray-200 py-2 px-4 rounded-lg transition-colors font-medium">
+                                    <i class="fas fa-print mr-2"></i>Print Certificate
+                                </button>
+                            </div>
+
+                            <!-- Gemstone Details -->
+                            <div class="space-y-6">
+                                <div class="grid grid-cols-2 gap-4">
+                                    <div class="bg-gray-50 p-4 rounded-lg">
+                                        <div class="text-sm text-secondary font-medium">Type</div>
+                                        <div class="text-lg font-semibold text-slate-900" data-bind="certificate.type" data-mock="true">Natural Diamond</div>
+                                    </div>
+                                    <div class="bg-gray-50 p-4 rounded-lg">
+                                        <div class="text-sm text-secondary font-medium">Weight</div>
+                                        <div class="text-lg font-semibold text-slate-900" data-bind="certificate.weight" data-mock="true">2.45 Carats</div>
+                                    </div>
+                                    <div class="bg-gray-50 p-4 rounded-lg">
+                                        <div class="text-sm text-secondary font-medium">Color</div>
+                                        <div class="text-lg font-semibold text-slate-900" data-bind="certificate.color" data-mock="true">D (Colorless)</div>
+                                    </div>
+                                    <div class="bg-gray-50 p-4 rounded-lg">
+                                        <div class="text-sm text-secondary font-medium">Clarity</div>
+                                        <div class="text-lg font-semibold text-slate-900" data-bind="certificate.clarity" data-mock="true">VVS1</div>
+                                    </div>
+                                    <div class="bg-gray-50 p-4 rounded-lg">
+                                        <div class="text-sm text-secondary font-medium">Cut</div>
+                                        <div class="text-lg font-semibold text-slate-900" data-bind="certificate.cut" data-mock="true">Excellent</div>
+                                    </div>
+                                    <div class="bg-gray-50 p-4 rounded-lg">
+                                        <div class="text-sm text-secondary font-medium">Origin</div>
+                                        <div class="text-lg font-semibold text-slate-900" data-bind="certificate.origin" data-mock="true">Botswana</div>
+                                    </div>
+                                </div>
+
+                                <!-- Additional Properties -->
+                                <div class="border-t pt-4">
+                                    <h4 class="font-semibold text-slate-900 mb-3">Additional Properties</h4>
+                                    <div class="space-y-2 text-sm">
+                                        <div class="flex justify-between">
+                                            <span class="text-secondary">Polish:</span>
+                                            <span class="font-medium" data-bind="certificate.polish" data-mock="true">Excellent</span>
+                                        </div>
+                                        <div class="flex justify-between">
+                                            <span class="text-secondary">Symmetry:</span>
+                                            <span class="font-medium" data-bind="certificate.symmetry" data-mock="true">Excellent</span>
+                                        </div>
+                                        <div class="flex justify-between">
+                                            <span class="text-secondary">Fluorescence:</span>
+                                            <span class="font-medium" data-bind="certificate.fluorescence" data-mock="true">None</span>
+                                        </div>
+                                        <div class="flex justify-between">
+                                            <span class="text-secondary">Measurements:</span>
+                                            <span class="font-medium" data-bind="certificate.measurements" data-mock="true">8.52 x 8.48 x 5.23 mm</span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Verification Status -->
+                                <div class="bg-accent bg-opacity-10 border border-accent rounded-lg p-4">
+                                    <div class="flex items-center space-x-3">
+                                        <i class="fas fa-check-circle text-accent text-xl"></i>
+                                        <div>
+                                            <div class="font-semibold text-accent">Verified Authentic</div>
+                                            <div class="text-sm text-gray-600">This certificate has been verified in our database</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- @END_COMPONENT: Certificate Display Card -->
+            </div>
+        </section>
+        <!-- @END_COMPONENT: Public Certificate Search Section -->
+
+        <!-- @COMPONENT: Admin Dashboard Section -->
+        <section id="admin-section" class="hidden" data-bind="adminSection.isVisible">
+            <div class="mb-8">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h2 class="text-3xl font-bold text-slate-900">Admin Dashboard</h2>
+                        <p class="text-secondary mt-1">Manage certificates and gemstone data</p>
+                    </div>
+                    <button class="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition-colors" data-event="click:logout">
+                        <i class="fas fa-sign-out-alt mr-2"></i>Logout
+                    </button>
+                </div>
+            </div>
+
+            <!-- Admin Stats Cards -->
+            <div class="grid md:grid-cols-4 gap-6 mb-8">
+                <div class="bg-white rounded-lg shadow-md p-6">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <div class="text-2xl font-bold text-slate-900" data-bind="stats.totalCertificates" data-mock="true">1,247</div>
+                            <div class="text-sm text-secondary">Total Certificates</div>
+                        </div>
+                        <i class="fas fa-certificate text-primary text-2xl"></i>
+                    </div>
+                </div>
+                <div class="bg-white rounded-lg shadow-md p-6">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <div class="text-2xl font-bold text-slate-900" data-bind="stats.thisMonth" data-mock="true">89</div>
+                            <div class="text-sm text-secondary">This Month</div>
+                        </div>
+                        <i class="fas fa-calendar text-accent text-2xl"></i>
+                    </div>
+                </div>
+                <div class="bg-white rounded-lg shadow-md p-6">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <div class="text-2xl font-bold text-slate-900" data-bind="stats.searches" data-mock="true">15,432</div>
+                            <div class="text-sm text-secondary">Total Searches</div>
+                        </div>
+                        <i class="fas fa-search text-blue-500 text-2xl"></i>
+                    </div>
+                </div>
+                <div class="bg-white rounded-lg shadow-md p-6">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <div class="text-2xl font-bold text-slate-900" data-bind="stats.pending" data-mock="true">7</div>
+                            <div class="text-sm text-secondary">Pending Review</div>
+                        </div>
+                        <i class="fas fa-clock text-orange-500 text-2xl"></i>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Admin Action Buttons -->
+            <div class="flex flex-wrap gap-4 mb-8">
+                <button class="bg-primary text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors font-medium" data-event="click:showAddCertificateForm">
+                    <i class="fas fa-plus mr-2"></i>Add New Certificate
+                </button>
+                <button class="bg-gray-600 text-white px-6 py-3 rounded-lg hover:bg-gray-700 transition-colors font-medium" data-event="click:showManageCertificates">
+                    <i class="fas fa-list mr-2"></i>Manage Certificates
+                </button>
+                <button class="bg-accent text-white px-6 py-3 rounded-lg hover:bg-green-700 transition-colors font-medium" data-event="click:exportData">
+                    <i class="fas fa-download mr-2"></i>Export Data
+                </button>
+            </div>
+
+            <!-- Certificate Form -->
+            <div id="certificate-form" class="bg-white rounded-xl shadow-lg border border-gray-200 p-8">
+                <h3 class="text-2xl font-bold text-slate-900 mb-6">Add New Certificate</h3>
+                <form class="space-y-6" data-event="submit:handleCertificateSubmission">
+                    <div class="grid md:grid-cols-2 gap-6">
+                        <!-- Basic Information -->
+                        <div class="space-y-4">
+                            <h4 class="font-semibold text-slate-900 border-b pb-2">Basic Information</h4>
+                            
+                            <div>
+                                <label class="block text-sm font-medium text-slate-700 mb-2">Certificate Number *</label>
+                                <input type="text" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent" placeholder="GC-2024-XXXXXX" data-mock="true">
+                            </div>
+                            
+                            <div>
+                                <label class="block text-sm font-medium text-slate-700 mb-2">Gemstone Type *</label>
+                                <select class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent" data-mock="true">
+                                    <option>Select type...</option>
+                                    <option>Natural Diamond</option>
+                                    <option>Ruby</option>
+                                    <option>Sapphire</option>
+                                    <option>Emerald</option>
+                                    <option>Other</option>
+                                </select>
+                            </div>
+                            
+                            <div>
+                                <label class="block text-sm font-medium text-slate-700 mb-2">Weight (Carats) *</label>
+                                <input type="number" step="0.01" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent" placeholder="0.00" data-mock="true">
+                            </div>
+                            
+                            <div>
+                                <label class="block text-sm font-medium text-slate-700 mb-2">Color Grade *</label>
+                                <input type="text" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent" placeholder="e.g., D, E, F..." data-mock="true">
+                            </div>
+                            
+                            <div>
+                                <label class="block text-sm font-medium text-slate-700 mb-2">Clarity Grade *</label>
+                                <input type="text" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent" placeholder="e.g., FL, IF, VVS1..." data-mock="true">
+                            </div>
+                        </div>
+
+                        <!-- Additional Properties -->
+                        <div class="space-y-4">
+                            <h4 class="font-semibold text-slate-900 border-b pb-2">Additional Properties</h4>
+                            
+                            <div>
+                                <label class="block text-sm font-medium text-slate-700 mb-2">Cut Grade</label>
+                                <select class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent" data-mock="true">
+                                    <option>Select cut grade...</option>
+                                    <option>Excellent</option>
+                                    <option>Very Good</option>
+                                    <option>Good</option>
+                                    <option>Fair</option>
+                                    <option>Poor</option>
+                                </select>
+                            </div>
+                            
+                            <div>
+                                <label class="block text-sm font-medium text-slate-700 mb-2">Origin</label>
+                                <input type="text" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent" placeholder="e.g., Botswana, South Africa..." data-mock="true">
+                            </div>
+                            
+                            <div>
+                                <label class="block text-sm font-medium text-slate-700 mb-2">Polish</label>
+                                <select class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent" data-mock="true">
+                                    <option>Excellent</option>
+                                    <option>Very Good</option>
+                                    <option>Good</option>
+                                    <option>Fair</option>
+                                    <option>Poor</option>
+                                </select>
+                            </div>
+                            
+                            <div>
+                                <label class="block text-sm font-medium text-slate-700 mb-2">Symmetry</label>
+                                <select class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent" data-mock="true">
+                                    <option>Excellent</option>
+                                    <option>Very Good</option>
+                                    <option>Good</option>
+                                    <option>Fair</option>
+                                    <option>Poor</option>
+                                </select>
+                            </div>
+                            
+                            <div>
+                                <label class="block text-sm font-medium text-slate-700 mb-2">Measurements (mm)</label>
+                                <input type="text" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent" placeholder="e.g., 8.52 x 8.48 x 5.23" data-mock="true">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Image Upload -->
+                    <div class="border-t pt-6">
+                        <h4 class="font-semibold text-slate-900 mb-4">Gemstone Images</h4>
+                        <div class="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:border-primary transition-colors" data-implementation="Use FileUpload component here">
+                            <i class="fas fa-cloud-upload-alt text-4xl text-gray-400 mb-4"></i>
+                            <div class="text-lg font-medium text-slate-700 mb-2">Upload Gemstone Photos</div>
+                            <div class="text-sm text-secondary mb-4">Drag and drop files here, or click to browse</div>
+                            <button type="button" class="bg-primary text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors">
+                                Choose Files
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Form Actions -->
+                    <div class="flex justify-end space-x-4 pt-6 border-t">
+                        <button type="button" class="px-6 py-2 border border-gray-300 rounded-lg text-slate-700 hover:bg-gray-50 transition-colors" data-event="click:cancelForm">
+                            Cancel
+                        </button>
+                        <button type="submit" class="bg-primary text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors" data-implementation="Should validate form before submission">
+                            <i class="fas fa-save mr-2"></i>Save Certificate
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </section>
+        <!-- @END_COMPONENT: Admin Dashboard Section -->
+
+        <!-- @COMPONENT: Admin Login Modal (Hidden by default) -->
+        <div id="admin-login-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden" data-bind="adminLoginModal.isVisible">
+            <div class="bg-white rounded-xl shadow-xl p-8 max-w-md w-full mx-4">
+                <div class="text-center mb-6">
+                    <i class="fas fa-shield-alt text-primary text-4xl mb-4"></i>
+                    <h3 class="text-2xl font-bold text-slate-900">Admin Access</h3>
+                    <p class="text-secondary">Enter your credentials to access the admin panel</p>
+                </div>
+                
+                <form class="space-y-4" data-event="submit:handleAdminLogin">
+                    <div>
+                        <label class="block text-sm font-medium text-slate-700 mb-2">Username</label>
+                        <input type="text" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent" placeholder="Enter username" data-mock="true">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-slate-700 mb-2">Password</label>
+                        <input type="password" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent" placeholder="Enter password" data-mock="true">
+                    </div>
+                    <div class="flex justify-end space-x-3 pt-4">
+                        <button type="button" class="px-6 py-2 border border-gray-300 rounded-lg text-slate-700 hover:bg-gray-50 transition-colors" data-event="click:closeAdminModal">
+                            Cancel
+                        </button>
+                        <button type="submit" class="bg-primary text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors">
+                            Login
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+        <!-- @END_COMPONENT: Admin Login Modal -->
+
+    </main>
+    <!-- @END_COMPONENT: Main Application Container -->
+
+    <!-- @COMPONENT: Footer -->
+    <footer class="bg-white border-t border-gray-200 mt-16">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+            <div class="grid md:grid-cols-4 gap-8">
+                <div class="space-y-4">
+                    <div class="flex items-center space-x-2">
+                        <i class="fas fa-gem text-primary text-xl"></i>
+                        <span class="text-xl font-bold text-slate-900">GemCert</span>
+                    </div>
+                    <p class="text-secondary">Professional gemstone certification and verification services trusted by collectors and dealers worldwide.</p>
+                </div>
+                <div>
+                    <h4 class="font-semibold text-slate-900 mb-4">Services</h4>
+                    <ul class="space-y-2 text-secondary">
+                        <li><a href="#" class="hover:text-primary transition-colors">Certificate Lookup</a></li>
+                        <li><a href="#" class="hover:text-primary transition-colors">Gemstone Grading</a></li>
+                        <li><a href="#" class="hover:text-primary transition-colors">Origin Verification</a></li>
+                        <li><a href="#" class="hover:text-primary transition-colors">Bulk Certification</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="font-semibold text-slate-900 mb-4">Company</h4>
+                    <ul class="space-y-2 text-secondary">
+                        <li><a href="#" class="hover:text-primary transition-colors">About Us</a></li>
+                        <li><a href="#" class="hover:text-primary transition-colors">Laboratory</a></li>
+                        <li><a href="#" class="hover:text-primary transition-colors">Standards</a></li>
+                        <li><a href="#" class="hover:text-primary transition-colors">Contact</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="font-semibold text-slate-900 mb-4">Contact Info</h4>
+                    <div class="space-y-2 text-secondary">
+                        <div class="flex items-center space-x-2">
+                            <i class="fas fa-phone text-primary"></i>
+                            <span>+1 (555) 123-4567</span>
+                        </div>
+                        <div class="flex items-center space-x-2">
+                            <i class="fas fa-envelope text-primary"></i>
+                            <span>info@gemcert.com</span>
+                        </div>
+                        <div class="flex items-center space-x-2">
+                            <i class="fas fa-map-marker-alt text-primary"></i>
+                            <span>123 Diamond District, NY</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="border-t border-gray-200 mt-8 pt-8 text-center text-secondary">
+                <p>&copy; 2024 GemCert Laboratory. All rights reserved. | <a href="#" class="hover:text-primary transition-colors">Privacy Policy</a> | <a href="#" class="hover:text-primary transition-colors">Terms of Service</a></p>
+            </div>
+        </div>
+    </footer>
+    <!-- @END_COMPONENT: Footer -->
+
+    <script>
+        // TODO: Implement business logic, API calls, and state management
+        (function() {
+            // Mock application state
+            let appState = {
+                currentView: 'search',
+                isAdminLoggedIn: false,
+                searchResults: null,
+                isLoading: false
+            };
+
+            // View management
+            function showSearchView() {
+                document.getElementById('search-section').classList.remove('hidden');
+                document.getElementById('admin-section').classList.add('hidden');
+                appState.currentView = 'search';
+            }
+
+            function showAdminView() {
+                document.getElementById('search-section').classList.add('hidden');
+                document.getElementById('admin-section').classList.remove('hidden');
+                appState.currentView = 'admin';
+            }
+
+            function showAdminLogin() {
+                document.getElementById('admin-login-modal').classList.remove('hidden');
+            }
+
+            function closeAdminModal() {
+                document.getElementById('admin-login-modal').classList.add('hidden');
+            }
+
+            // Mock search functionality
+            function handleCertificateSearch(event) {
+                event.preventDefault();
+                const certificateNumber = document.getElementById('certificateNumber').value;
+                
+                if (!certificateNumber) {
+                    alert('Please enter a certificate number');
+                    return;
+                }
+                
+                // Simulate API call delay
+                appState.isLoading = true;
+                setTimeout(() => {
+                    document.getElementById('search-results').classList.remove('hidden');
+                    appState.isLoading = false;
+                    appState.searchResults = { /* mock data */ };
+                }, 1000);
+            }
+
+            // Mock admin login
+            function handleAdminLogin(event) {
+                event.preventDefault();
+                // Simulate login validation
+                appState.isAdminLoggedIn = true;
+                closeAdminModal();
+                showAdminView();
+            }
+
+            // Initialize event listeners
+            document.addEventListener('DOMContentLoaded', function() {
+                // Search form
+                const searchForm = document.querySelector('[data-event="submit:handleCertificateSearch"]');
+                if (searchForm) {
+                    searchForm.addEventListener('submit', handleCertificateSearch);
+                }
+
+                // Admin login form
+                const adminLoginForm = document.querySelector('[data-event="submit:handleAdminLogin"]');
+                if (adminLoginForm) {
+                    adminLoginForm.addEventListener('submit', handleAdminLogin);
+                }
+
+                // Admin login button
+                const adminLoginBtn = document.querySelector('[data-event="click:showAdminLogin"]');
+                if (adminLoginBtn) {
+                    adminLoginBtn.addEventListener('click', showAdminLogin);
+                }
+
+                // Close modal button
+                const closeModalBtn = document.querySelector('[data-event="click:closeAdminModal"]');
+                if (closeModalBtn) {
+                    closeModalBtn.addEventListener('click', closeAdminModal);
+                }
+
+                // Navigation links
+                const searchLink = document.querySelector('[data-event="click:showSearchView"]');
+                if (searchLink) {
+                    searchLink.addEventListener('click', function(e) {
+                        e.preventDefault();
+                        showSearchView();
+                    });
+                }
+            });
+
+            // Close modal when clicking outside
+            document.addEventListener('click', function(event) {
+                const modal = document.getElementById('admin-login-modal');
+                if (event.target === modal) {
+                    closeAdminModal();
+                }
+            });
+        })();
+    </script>
+</body>
+</html>
