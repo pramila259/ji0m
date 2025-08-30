@@ -1,10 +1,7 @@
-const { Pool } = require('pg');
+const { neon } = require('@neondatabase/serverless');
 
-// Initialize database connection
-const pool = new Pool({
-  connectionString: process.env.DATABASE_URL,
-  ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false
-});
+// Initialize Neon database connection
+const sql = neon(process.env.DATABASE_URL);
 
 // CORS headers for all responses
 const corsHeaders = {
@@ -13,7 +10,7 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'Content-Type, Authorization',
 };
 
-export default async function handler(req, res) {
+module.exports = async function handler(req, res) {
   // Handle preflight requests
   if (req.method === 'OPTIONS') {
     return res.status(200).json({});
@@ -38,19 +35,16 @@ export default async function handler(req, res) {
     }
 
     // Find user by username
-    const result = await pool.query(
-      'SELECT * FROM users WHERE username = $1',
-      [username]
-    );
+    const result = await sql`SELECT * FROM users WHERE username = ${username}`;
 
-    if (result.rows.length === 0) {
+    if (result.length === 0) {
       return res.status(401).json({ 
         error: 'Invalid credentials',
         message: 'Username or password is incorrect'
       });
     }
 
-    const user = result.rows[0];
+    const user = result[0];
 
     // Simple password comparison (in production, use bcrypt)
     if (user.password !== password) {
