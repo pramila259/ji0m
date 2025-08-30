@@ -57,7 +57,12 @@ const Header = ({ currentPage }) => (
                     <a 
                         href="/upload-certificate" 
                         className="bg-orange-500 text-white px-6 py-3 rounded-lg font-semibold hover:bg-orange-600 transition-colors"
-                        onClick={(e) => { e.preventDefault(); window.history.pushState({}, '', '/upload-certificate'); window.dispatchEvent(new PopStateEvent('popstate')); }}
+                        onClick={(e) => { 
+                            e.preventDefault(); 
+                            window.history.pushState({}, '', '/upload-certificate'); 
+                            window.dispatchEvent(new PopStateEvent('popstate'));
+                            window.dispatchEvent(new CustomEvent('navigation'));
+                        }}
                     >
                         Get Certificate
                     </a>
@@ -68,10 +73,10 @@ const Header = ({ currentPage }) => (
             <nav className="nav-menu">
                 <div className="container mx-auto px-4">
                     <div className="flex">
-                        <a href="/" className={`nav-item ${currentPage === 'home' ? 'active' : ''}`} onClick={(e) => { e.preventDefault(); window.history.pushState({}, '', '/'); window.dispatchEvent(new PopStateEvent('popstate')); }}>Home</a>
-                        <a href="/about" className={`nav-item ${currentPage === 'about' ? 'active' : ''}`} onClick={(e) => { e.preventDefault(); window.history.pushState({}, '', '/about'); window.dispatchEvent(new PopStateEvent('popstate')); }}>About</a>
-                        <a href="/certification" className={`nav-item ${currentPage === 'certification' ? 'active' : ''}`} onClick={(e) => { e.preventDefault(); window.history.pushState({}, '', '/certification'); window.dispatchEvent(new PopStateEvent('popstate')); }}>Certification</a>
-                        <a href="/contact" className={`nav-item ${currentPage === 'contact' ? 'active' : ''}`} onClick={(e) => { e.preventDefault(); window.history.pushState({}, '', '/contact'); window.dispatchEvent(new PopStateEvent('popstate')); }}>Contact</a>
+                        <a href="/" className={`nav-item ${currentPage === 'home' ? 'active' : ''}`} onClick={(e) => { e.preventDefault(); window.history.pushState({}, '', '/'); window.dispatchEvent(new PopStateEvent('popstate')); window.dispatchEvent(new CustomEvent('navigation')); }}>Home</a>
+                        <a href="/about" className={`nav-item ${currentPage === 'about' ? 'active' : ''}`} onClick={(e) => { e.preventDefault(); window.history.pushState({}, '', '/about'); window.dispatchEvent(new PopStateEvent('popstate')); window.dispatchEvent(new CustomEvent('navigation')); }}>About</a>
+                        <a href="/certification" className={`nav-item ${currentPage === 'certification' ? 'active' : ''}`} onClick={(e) => { e.preventDefault(); window.history.pushState({}, '', '/certification'); window.dispatchEvent(new PopStateEvent('popstate')); window.dispatchEvent(new CustomEvent('navigation')); }}>Certification</a>
+                        <a href="/contact" className={`nav-item ${currentPage === 'contact' ? 'active' : ''}`} onClick={(e) => { e.preventDefault(); window.history.pushState({}, '', '/contact'); window.dispatchEvent(new PopStateEvent('popstate')); window.dispatchEvent(new CustomEvent('navigation')); }}>Contact</a>
                     </div>
                 </div>
             </nav>
@@ -1168,9 +1173,26 @@ const Router = () => {
     const [currentPath, setCurrentPath] = useState(window.location.pathname);
 
     useEffect(() => {
-        const handlePopState = () => setCurrentPath(window.location.pathname);
+        const handlePopState = () => {
+            setCurrentPath(window.location.pathname);
+        };
+        
+        // Handle initial path
+        setCurrentPath(window.location.pathname);
+        
         window.addEventListener('popstate', handlePopState);
-        return () => window.removeEventListener('popstate', handlePopState);
+        
+        // Also listen for custom navigation events
+        const handleNavigation = () => {
+            setCurrentPath(window.location.pathname);
+        };
+        
+        window.addEventListener('navigation', handleNavigation);
+        
+        return () => {
+            window.removeEventListener('popstate', handlePopState);
+            window.removeEventListener('navigation', handleNavigation);
+        };
     }, []);
 
     if (currentPath === '/upload-certificate') {
