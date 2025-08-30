@@ -850,6 +850,8 @@ const UploadCertificatePage = () => {
                 imageUrl: photoUrl || null
             };
 
+            console.log('Submitting certificate data:', submitData); // Debug log
+
             const response = await fetch('/api/certificates', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -857,6 +859,7 @@ const UploadCertificatePage = () => {
             });
 
             const result = await response.json();
+            console.log('API Response:', result); // Debug log
 
             if (response.ok) {
                 setMessage('Certificate uploaded successfully!');
@@ -876,10 +879,12 @@ const UploadCertificatePage = () => {
                 });
                 setPhotoUrl('');
             } else {
-                setMessage(result.message || 'Error uploading certificate');
+                setMessage(`Error: ${result.message || result.error || 'Unknown error occurred'}`);
+                console.error('Upload error:', result);
             }
         } catch (error) {
-            setMessage('Error uploading certificate');
+            console.error('Network error:', error);
+            setMessage(`Network error: ${error.message}`);
         } finally {
             setLoading(false);
         }
