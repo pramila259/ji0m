@@ -84,17 +84,38 @@ class GIEApp {
         this.showLoading(true);
 
         try {
-            const response = await fetch(`/api/certificates/lookup/${encodeURIComponent(certificateNumber)}`);
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
+
+            const response = await fetch(`/api/certificates/lookup/${encodeURIComponent(certificateNumber)}`, {
+                signal: controller.signal,
+                headers: {
+                    'Cache-Control': 'no-cache',
+                    'Pragma': 'no-cache'
+                }
+            });
+            
+            clearTimeout(timeoutId);
             const data = await response.json();
 
             if (response.ok) {
                 this.displayCertificate(data);
+                // Cache the successful result
+                localStorage.setItem(`cert-${certificateNumber}`, JSON.stringify({
+                    data,
+                    timestamp: Date.now()
+                }));
             } else {
                 this.showMessage(data.message || 'Certificate not found', 'error');
                 document.getElementById('certificateResult').classList.add('hidden');
             }
         } catch (error) {
-            this.showMessage('Error searching certificate', 'error');
+            if (error.name === 'AbortError') {
+                this.showMessage('Request timed out. Please try again.', 'error');
+            } else {
+                this.showMessage('Error searching certificate. Please check your internet connection.', 'error');
+                console.error('Certificate search error:', error);
+            }
         } finally {
             this.showLoading(false);
         }
