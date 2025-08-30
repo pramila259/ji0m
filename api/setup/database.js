@@ -1,24 +1,10 @@
 const { Pool } = require('pg');
-const { parse } = require('url');
 
-// Initialize database connection with proper SSL handling for Neon
-const getDatabaseConfig = () => {
-  const connectionString = process.env.DATABASE_URL;
-  const parsed = parse(connectionString);
-  
-  return {
-    connectionString,
-    ssl: {
-      rejectUnauthorized: false,
-      sslmode: 'require'
-    },
-    max: 20, // connection pool max size
-    idleTimeoutMillis: 30000, // how long a connection can be idle before being closed
-    connectionTimeoutMillis: 2000, // how long to try connecting before timing out
-  };
-};
-
-const pool = new Pool(getDatabaseConfig());
+// Initialize database connection
+const pool = new Pool({
+  connectionString: process.env.DATABASE_URL,
+  ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false
+});
 
 module.exports = async function handler(req, res) {
   if (req.method !== 'POST') {
