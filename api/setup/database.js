@@ -1,19 +1,33 @@
-const { Pool } = require('pg');
+const { neon } = require('@neondatabase/serverless');
 
-// Initialize database connection
-const pool = new Pool({
-  connectionString: process.env.DATABASE_URL,
-  ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false
-});
+// Initialize Neon database connection
+const sql = neon(process.env.DATABASE_URL);
 
-module.exports = async function handler(req, res) {
+// CORS headers for all responses
+const corsHeaders = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
+  'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+};
+
+export default async function handler(req, res) {
+  // Handle preflight requests
+  if (req.method === 'OPTIONS') {
+    return res.status(200).json({});
+  }
+
+  // Set CORS headers
+  Object.entries(corsHeaders).forEach(([key, value]) => {
+    res.setHeader(key, value);
+  });
+
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
   try {
     // Create certificates table
-    await pool.query(`
+    await sql`
       CREATE TABLE IF NOT EXISTS certificates (
         id SERIAL PRIMARY KEY,
         certificatenumber VARCHAR(255) UNIQUE NOT NULL,
@@ -31,24 +45,24 @@ module.exports = async function handler(req, res) {
         imageurl TEXT,
         createdat TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       )
-    `);
+    `;
 
     // Create users table
-    await pool.query(`
+    await sql`
       CREATE TABLE IF NOT EXISTS users (
         id SERIAL PRIMARY KEY,
         username VARCHAR(255) UNIQUE NOT NULL,
         password VARCHAR(255) NOT NULL,
         createdat TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       )
-    `);
+    `;
 
     // Insert default admin user if not exists
-    await pool.query(`
+    await sql`
       INSERT INTO users (username, password) 
       VALUES ('admin', 'admin123') 
       ON CONFLICT (username) DO NOTHING
-    `);
+    `;
 
     // Insert sample certificates if not exists
     const sampleCertificates = [
@@ -100,18 +114,16 @@ module.exports = async function handler(req, res) {
     ];
 
     for (const cert of sampleCertificates) {
-      await pool.query(`
+      await sql`
         INSERT INTO certificates (
           certificatenumber, gemstonetype, caratweight, color, 
           clarity, cut, polish, symmetry, fluorescence, 
           measurements, origin, issuedate, imageurl
-        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13) 
+        ) VALUES (${cert.certificatenumber}, ${cert.gemstonetype}, ${cert.caratweight}, ${cert.color},
+          ${cert.clarity}, ${cert.cut}, ${cert.polish}, ${cert.symmetry}, ${cert.fluorescence},
+          ${cert.measurements}, ${cert.origin}, ${cert.issuedate}, ${cert.imageurl})
         ON CONFLICT (certificatenumber) DO NOTHING
-      `, [
-        cert.certificatenumber, cert.gemstonetype, cert.caratweight, cert.color,
-        cert.clarity, cert.cut, cert.polish, cert.symmetry, cert.fluorescence,
-        cert.measurements, cert.origin, cert.issuedate, cert.imageurl
-      ]);
+      `;
     }
 
     return res.status(200).json({ 
