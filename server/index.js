@@ -185,8 +185,11 @@ const server = http.createServer(async (req, res) => {
           clarity: body.clarity,
           cut: body.cut,
           polish: body.polish,
+          symmetry: body.symmetry,
+          fluorescence: body.fluorescence,
           measurements: body.measurements,
           origin: body.origin,
+          issueDate: body.issueDate,
           imageUrl: body.imageUrl || null
         });
 
