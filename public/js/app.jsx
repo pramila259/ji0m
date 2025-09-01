@@ -858,8 +858,21 @@ const UploadCertificatePage = () => {
                 body: JSON.stringify(submitData)
             });
 
-            const result = await response.json();
-            console.log('API Response:', result); // Debug log
+            console.log('Response status:', response.status);
+            console.log('Response headers:', [...response.headers.entries()]);
+            
+            const responseText = await response.text();
+            console.log('Raw response text:', responseText);
+            
+            let result;
+            try {
+                result = JSON.parse(responseText);
+                console.log('Parsed JSON result:', result);
+            } catch (parseError) {
+                console.error('JSON parse error:', parseError);
+                console.error('Response was not valid JSON:', responseText);
+                throw new Error(`Server returned invalid response: ${responseText.substring(0, 100)}`);
+            }
 
             if (response.ok) {
                 setMessage('Certificate uploaded successfully!');
