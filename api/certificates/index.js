@@ -12,24 +12,24 @@ let dbInitialized = false;
 
 async function initializeDatabase() {
   if (dbInitialized) return;
-  // ...existing code for table creation and sample data...
+  // If you have table creation/sample data code, put it here. If not, just mark initialized.
   dbInitialized = true;
 }
 
 module.exports = async function handler(req, res) {
-  // Set CORS headers
-  Object.entries(corsHeaders).forEach(([key, value]) => {
-    res.setHeader(key, value);
-  });
-
-  // Handle preflight requests
-  if (req.method === 'OPTIONS') {
-    return res.status(204).end();
-  }
-
-  await initializeDatabase();
-
   try {
+    // Set CORS headers
+    Object.entries(corsHeaders).forEach(([key, value]) => {
+      res.setHeader(key, value);
+    });
+
+    // Handle preflight requests
+    if (req.method === 'OPTIONS') {
+      return res.status(204).end();
+    }
+
+    await initializeDatabase();
+
     if (req.method === 'GET') {
       const result = await sql`SELECT * FROM certificates ORDER BY createdat DESC`;
       return res.status(200).json(result);
@@ -80,11 +80,11 @@ module.exports = async function handler(req, res) {
 
     return res.status(405).json({ error: 'Method not allowed' });
   } catch (error) {
-    console.error('Database error:', error);
-    return res.status(500).json({ 
+    // Always send JSON error response
+    res.status(500).json({ 
       error: 'Internal server error',
       message: error && error.message ? error.message : 'Failed to process certificate request',
-      details: error
+      details: error && (error.stack || error.toString())
     });
   }
 }
