@@ -161,21 +161,37 @@ const server = http.createServer(async (req, res) => {
       sendJSON(res, certificates);
     } else if (method === 'POST') {
       const body = await parseBody(req);
+      console.log('Certificate upload request body:', body);
       
       try {
+        // Validate required fields
+        const requiredFields = ['certificateNumber', 'gemstoneType', 'caratWeight', 'color', 'clarity', 'cut', 'polish', 'symmetry', 'fluorescence', 'measurements', 'origin', 'issueDate'];
+        const missingFields = requiredFields.filter(field => !body[field]);
+        
+        if (missingFields.length > 0) {
+          console.error('Missing required fields:', missingFields);
+          sendJSON(res, { 
+            message: `Missing required fields: ${missingFields.join(', ')}` 
+          }, 400);
+          return;
+        }
+        
         // Check if certificate number already exists in database
+        console.log('Checking for existing certificate:', body.certificateNumber);
         const existingInDb = await storage.checkCertificateExists(body.certificateNumber);
         const existingInMemory = certificates.find(cert => 
           cert.certificateNumber.toLowerCase() === body.certificateNumber?.toLowerCase()
         );
         
         if (existingInDb || existingInMemory) {
+          console.log('Certificate already exists');
           sendJSON(res, { 
             message: 'Certificate number already used. This certificate number is already in our system.' 
           }, 400);
           return;
         }
 
+        console.log('Creating new certificate in database');
         // Create certificate in database
         const newCertificate = await storage.createCertificate({
           certificateNumber: body.certificateNumber,
@@ -193,10 +209,12 @@ const server = http.createServer(async (req, res) => {
           imageUrl: body.imageUrl || null
         });
 
+        console.log('Certificate created successfully:', newCertificate.certificateNumber);
         sendJSON(res, newCertificate, 201);
       } catch (error) {
         console.error('Error creating certificate:', error);
-        sendJSON(res, { message: 'Error creating certificate' }, 500);
+        console.error('Error stack:', error.stack);
+        sendJSON(res, { message: `Error creating certificate: ${error.message}` }, 500);
       }
     }
     return;
