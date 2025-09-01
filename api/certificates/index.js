@@ -1,8 +1,22 @@
 const { neon } = require('@neondatabase/serverless');
 
-    dbInitialized = true;
-    console.log('Database initialized successfully');
-const { neon } = require('@neondatabase/serverless');
+const sql = neon(process.env.DATABASE_URL);
+
+const corsHeaders = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
+  'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+};
+
+let dbInitialized = false;
+
+async function initializeDatabase() {
+  if (dbInitialized) return;
+  // ...existing code for table creation and sample data...
+  dbInitialized = true;
+}
+
+module.exports = async function handler(req, res) {
   // Set CORS headers
   Object.entries(corsHeaders).forEach(([key, value]) => {
     res.setHeader(key, value);
@@ -13,18 +27,15 @@ const { neon } = require('@neondatabase/serverless');
     return res.status(204).end();
   }
 
-  // Auto-initialize database
   await initializeDatabase();
 
   try {
     if (req.method === 'GET') {
-      // Get all certificates
       const result = await sql`SELECT * FROM certificates ORDER BY createdat DESC`;
       return res.status(200).json(result);
     }
 
     if (req.method === 'POST') {
-      // Create new certificate
       const {
         certificateNumber,
         gemstoneType,
@@ -41,14 +52,11 @@ const { neon } = require('@neondatabase/serverless');
         imageUrl
       } = req.body || {};
 
-      // Basic validation
       if (!certificateNumber) {
         return res.status(400).json({ error: 'certificateNumber is required' });
       }
 
-      // Check for duplicate certificate number
       const existingCert = await sql`SELECT id FROM certificates WHERE certificatenumber = ${certificateNumber}`;
-
       if (existingCert && existingCert.length > 0) {
         return res.status(400).json({
           error: 'Certificate number already exists',
@@ -56,7 +64,6 @@ const { neon } = require('@neondatabase/serverless');
         });
       }
 
-      // Insert new certificate
       const inserted = await sql`
         INSERT INTO certificates (
           certificatenumber, gemstonetype, caratweight, color, 
@@ -68,7 +75,6 @@ const { neon } = require('@neondatabase/serverless');
           ${issueDate}, ${imageUrl}
         ) 
         RETURNING *`;
-
       return res.status(201).json(inserted && inserted[0] ? inserted[0] : inserted);
     }
 
@@ -80,4 +86,4 @@ const { neon } = require('@neondatabase/serverless');
       message: error && error.message ? error.message : 'Failed to process certificate request'
     });
   }
-// removed stray closing brace
+}
