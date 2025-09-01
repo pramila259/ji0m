@@ -112,20 +112,23 @@ function serveFile(res, filePath) {
 }
 
 const server = http.createServer(async (req, res) => {
-  const parsedUrl = url.parse(req.url, true);
-  const pathname = parsedUrl.pathname;
-  const method = req.method;
+  try {
+    const parsedUrl = url.parse(req.url, true);
+    const pathname = parsedUrl.pathname;
+    const method = req.method;
 
-  // CORS headers
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+    // CORS headers
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
 
-  if (method === 'OPTIONS') {
-    res.writeHead(200);
-    res.end();
-    return;
-  }
+    if (method === 'OPTIONS') {
+      res.writeHead(200);
+      res.end();
+      return;
+    }
+
+    console.log(`${method} ${pathname}`); // Log all requests
 
   // API Routes
   if (pathname.startsWith('/api/certificates/lookup/')) {
@@ -420,6 +423,18 @@ const server = http.createServer(async (req, res) => {
 
   // Default to index.html for SPA
   serveFile(res, path.join(__dirname, '../public/index.html'));
+  } catch (error) {
+    console.error('Unhandled server error:', error);
+    console.error('Stack trace:', error.stack);
+    try {
+      if (!res.headersSent) {
+        res.writeHead(500, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ message: 'Internal server error', error: error.message }));
+      }
+    } catch (writeError) {
+      console.error('Error writing error response:', writeError);
+    }
+  }
 });
 
 server.listen(PORT, '0.0.0.0', () => {
