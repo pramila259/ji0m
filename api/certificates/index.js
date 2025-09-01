@@ -83,7 +83,8 @@ module.exports = async function handler(req, res) {
     console.error('Database error:', error);
     return res.status(500).json({ 
       error: 'Internal server error',
-      message: error && error.message ? error.message : 'Failed to process certificate request'
+      message: error && error.message ? error.message : 'Failed to process certificate request',
+      details: error
     });
   }
 }
