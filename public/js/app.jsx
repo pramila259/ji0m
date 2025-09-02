@@ -852,9 +852,10 @@ const UploadCertificatePage = () => {
 
             console.log('Submitting certificate data:', submitData); // Debug log
 
-            // Use development API path to bypass any Vercel configuration
-            const apiUrl = window.location.origin + '/dev-api/certificates';
-            console.log('Making request to development API:', apiUrl);
+            // Force request to localhost to completely bypass Vercel
+            const isReplit = window.location.hostname.includes('replit');
+            const apiUrl = isReplit ? 'http://localhost:5000/dev-api/certificates' : '/dev-api/certificates';
+            console.log('Making request to local server:', apiUrl);
             
             const response = await fetch(apiUrl, {
                 method: 'POST',
@@ -1160,8 +1161,11 @@ const HomePage = () => {
         setCertificate(null);
 
         try {
-            const apiUrl = `${window.location.origin}/dev-api/certificates/lookup/${encodeURIComponent(certificateNumber)}`;
-            console.log('Searching certificate at development API:', apiUrl);
+            const isReplit = window.location.hostname.includes('replit');
+            const apiUrl = isReplit 
+                ? `http://localhost:5000/dev-api/certificates/lookup/${encodeURIComponent(certificateNumber)}`
+                : `/dev-api/certificates/lookup/${encodeURIComponent(certificateNumber)}`;
+            console.log('Searching certificate at local server:', apiUrl);
             const response = await fetch(apiUrl);
             const data = await response.json();
 
