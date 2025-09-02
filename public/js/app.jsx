@@ -852,9 +852,9 @@ const UploadCertificatePage = () => {
 
             console.log('Submitting certificate data:', submitData); // Debug log
 
-            // Use relative path - should hit local server with vercel.json disabled
+            // Use Vercel serverless functions directly
             const apiUrl = '/api/certificates';
-            console.log('Making request to local server API:', apiUrl);
+            console.log('Making request to Vercel API:', apiUrl);
             
             const response = await fetch(apiUrl, {
                 method: 'POST',
@@ -1161,7 +1161,7 @@ const HomePage = () => {
 
         try {
             const apiUrl = `/api/certificates/lookup/${encodeURIComponent(certificateNumber)}`;
-            console.log('Searching certificate at local server API:', apiUrl);
+            console.log('Searching certificate at Vercel API:', apiUrl);
             const response = await fetch(apiUrl);
             const data = await response.json();
 
