@@ -1,14 +1,13 @@
 import http from 'http';
 import fs from 'fs';
 import path from 'path';
-import { fileURLToPath } from 'url';
 import url from 'url';
-import { storage } from './storage.js';
-import { ObjectStorageService, ObjectNotFoundError } from './objectStorage.js';
+import { fileURLToPath } from 'url';
+import { sql } from './db.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 5000;
 
 // In-memory storage
 let certificates = [
@@ -135,11 +134,37 @@ const server = http.createServer(async (req, res) => {
     const certNumber = decodeURIComponent(pathname.split('/').pop());
     
     try {
-      // Try database first
-      const certificate = await storage.getCertificate(certNumber);
+      console.log('Looking up certificate:', certNumber);
       
-      if (certificate) {
-        sendJSON(res, certificate);
+      // Try database first using direct SQL
+      const certificateResult = await sql`
+        SELECT * FROM certificates 
+        WHERE LOWER(certificatenumber) = LOWER(${certNumber})
+        ORDER BY createdat DESC
+        LIMIT 1
+      `;
+      
+      if (certificateResult.length > 0) {
+        // Transform database result to expected format
+        const cert = certificateResult[0];
+        const transformedCert = {
+          id: cert.id,
+          certificateNumber: cert.certificatenumber,
+          gemstoneType: cert.gemstonetype,
+          caratWeight: cert.caratweight,
+          color: cert.color,
+          clarity: cert.clarity,
+          cut: cert.cut,
+          polish: cert.polish,
+          symmetry: cert.symmetry,
+          fluorescence: cert.fluorescence,
+          measurements: cert.measurements,
+          origin: cert.origin,
+          issueDate: cert.issuedate,
+          imageUrl: cert.imageurl,
+          createdAt: cert.createdat
+        };
+        sendJSON(res, transformedCert);
       } else {
         // Fallback to in-memory for sample data
         const fallbackCert = certificates.find(cert => 
@@ -179,14 +204,36 @@ const server = http.createServer(async (req, res) => {
           return;
         }
         
-        // Check if certificate number already exists in database
+        // Initialize database table if it doesn't exist
+        console.log('Ensuring certificates table exists...');
+        await sql`
+          CREATE TABLE IF NOT EXISTS certificates (
+            id SERIAL PRIMARY KEY,
+            certificatenumber VARCHAR(100) UNIQUE NOT NULL,
+            gemstonetype VARCHAR(100) NOT NULL,
+            caratweight VARCHAR(50) NOT NULL,
+            color VARCHAR(50) NOT NULL,
+            clarity VARCHAR(50) NOT NULL,
+            cut VARCHAR(100) NOT NULL,
+            polish VARCHAR(50) NOT NULL,
+            symmetry VARCHAR(50) NOT NULL,
+            fluorescence VARCHAR(50) NOT NULL,
+            measurements VARCHAR(100) NOT NULL,
+            origin VARCHAR(100) NOT NULL,
+            issuedate VARCHAR(50) NOT NULL,
+            imageurl TEXT,
+            createdat TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+          )
+        `;
+
+        // Check if certificate number already exists
         console.log('Checking for existing certificate:', body.certificateNumber);
-        const existingInDb = await storage.checkCertificateExists(body.certificateNumber);
-        const existingInMemory = certificates.find(cert => 
-          cert.certificateNumber.toLowerCase() === body.certificateNumber?.toLowerCase()
-        );
+        const existingCerts = await sql`
+          SELECT certificatenumber FROM certificates 
+          WHERE LOWER(certificatenumber) = LOWER(${body.certificateNumber})
+        `;
         
-        if (existingInDb || existingInMemory) {
+        if (existingCerts.length > 0) {
           console.log('Certificate already exists');
           sendJSON(res, { 
             message: 'Certificate number already used. This certificate number is already in our system.' 
@@ -195,24 +242,22 @@ const server = http.createServer(async (req, res) => {
         }
 
         console.log('Creating new certificate in database');
-        // Create certificate in database
-        const newCertificate = await storage.createCertificate({
-          certificateNumber: body.certificateNumber,
-          gemstoneType: body.gemstoneType,
-          caratWeight: body.caratWeight,
-          color: body.color,
-          clarity: body.clarity,
-          cut: body.cut,
-          polish: body.polish,
-          symmetry: body.symmetry,
-          fluorescence: body.fluorescence,
-          measurements: body.measurements,
-          origin: body.origin,
-          issueDate: body.issueDate,
-          imageUrl: body.imageUrl || null
-        });
+        // Insert new certificate using direct SQL
+        const newCertificateResult = await sql`
+          INSERT INTO certificates (
+            certificatenumber, gemstonetype, caratweight, color, clarity,
+            cut, polish, symmetry, fluorescence, measurements, origin,
+            issuedate, imageurl
+          ) VALUES (
+            ${body.certificateNumber}, ${body.gemstoneType}, ${body.caratWeight},
+            ${body.color}, ${body.clarity}, ${body.cut}, ${body.polish},
+            ${body.symmetry}, ${body.fluorescence}, ${body.measurements},
+            ${body.origin}, ${body.issueDate}, ${body.imageUrl || null}
+          ) RETURNING *
+        `;
 
-        console.log('Certificate created successfully:', newCertificate.certificateNumber);
+        const newCertificate = newCertificateResult[0];
+        console.log('Certificate created successfully:', newCertificate.certificatenumber);
         sendJSON(res, newCertificate, 201);
       } catch (error) {
         console.error('Error creating certificate:', error);
@@ -223,48 +268,15 @@ const server = http.createServer(async (req, res) => {
     return;
   }
 
-  // Photo upload endpoints for object storage
-  if (pathname === '/api/objects/upload' && method === 'POST') {
-    try {
-      const objectStorageService = new ObjectStorageService();
-      const uploadURL = await objectStorageService.getObjectEntityUploadURL();
-      sendJSON(res, { uploadURL });
-    } catch (error) {
-      console.error('Error getting upload URL:', error);
-      sendJSON(res, { message: 'Error getting upload URL' }, 500);
-    }
-    return;
-  }
-
-  // Photo URL handling endpoint
-  if (pathname === '/api/objects/set-url' && method === 'POST') {
+  // Simplified photo upload - store as base64 in database
+  if (pathname === '/api/upload-photo' && method === 'POST') {
     try {
       const body = await parseBody(req);
-      const objectStorageService = new ObjectStorageService();
-      const objectPath = objectStorageService.normalizeObjectEntityPath(body.uploadURL);
-      sendJSON(res, { objectPath });
+      // For now, just return the base64 data as is
+      sendJSON(res, { imageUrl: body.imageData });
     } catch (error) {
-      console.error('Error setting object URL:', error);
-      sendJSON(res, { message: 'Error processing upload URL' }, 500);
-    }
-    return;
-  }
-
-  // Serve uploaded objects
-  if (pathname.startsWith('/objects/')) {
-    try {
-      const objectStorageService = new ObjectStorageService();
-      const objectFile = await objectStorageService.getObjectEntityFile(pathname);
-      await objectStorageService.downloadObject(objectFile, res);
-    } catch (error) {
-      if (error instanceof ObjectNotFoundError) {
-        res.writeHead(404);
-        res.end('Object not found');
-      } else {
-        console.error('Error serving object:', error);
-        res.writeHead(500);
-        res.end('Error serving object');
-      }
+      console.error('Error processing photo upload:', error);
+      sendJSON(res, { message: 'Error processing photo' }, 500);
     }
     return;
   }
