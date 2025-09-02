@@ -852,7 +852,11 @@ const UploadCertificatePage = () => {
 
             console.log('Submitting certificate data:', submitData); // Debug log
 
-            const response = await fetch('/api/certificates', {
+            // Force request to local Node.js server instead of Vercel functions
+            const apiUrl = window.location.origin + '/api/certificates';
+            console.log('Making request to:', apiUrl);
+            
+            const response = await fetch(apiUrl, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(submitData)
@@ -1156,7 +1160,9 @@ const HomePage = () => {
         setCertificate(null);
 
         try {
-            const response = await fetch(`/api/certificates/lookup/${encodeURIComponent(certificateNumber)}`);
+            const apiUrl = `${window.location.origin}/api/certificates/lookup/${encodeURIComponent(certificateNumber)}`;
+            console.log('Searching certificate at:', apiUrl);
+            const response = await fetch(apiUrl);
             const data = await response.json();
 
             if (response.ok) {
