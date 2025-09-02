@@ -1,11 +1,9 @@
 const { neon } = require('@neondatabase/serverless');
 
-// Initialize Neon database connection using the new production branch approach
-if (!process.env.DATABASE_URL) {
-  throw new Error('DATABASE_URL must be set. Did you forget to provision a database?');
-}
+// Use the provided Neon database connection string directly
+const DATABASE_URL = process.env.DATABASE_URL || 'postgresql://neondb_owner:npg_0emZHsKUwy8V@ep-falling-brook-a1555d6b-pooler.ap-southeast-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require';
 
-const sql = neon(process.env.DATABASE_URL);
+const sql = neon(DATABASE_URL);
 
 // CORS headers for all responses
 const corsHeaders = {
