@@ -206,25 +206,34 @@ const server = http.createServer(async (req, res) => {
         
         // Initialize database table if it doesn't exist
         console.log('Ensuring certificates table exists...');
-        await sql`
-          CREATE TABLE IF NOT EXISTS certificates (
-            id SERIAL PRIMARY KEY,
-            certificatenumber VARCHAR(100) UNIQUE NOT NULL,
-            gemstonetype VARCHAR(100) NOT NULL,
-            caratweight VARCHAR(50) NOT NULL,
-            color VARCHAR(50) NOT NULL,
-            clarity VARCHAR(50) NOT NULL,
-            cut VARCHAR(100) NOT NULL,
-            polish VARCHAR(50) NOT NULL,
-            symmetry VARCHAR(50) NOT NULL,
-            fluorescence VARCHAR(50) NOT NULL,
-            measurements VARCHAR(100) NOT NULL,
-            origin VARCHAR(100) NOT NULL,
-            issuedate VARCHAR(50) NOT NULL,
-            imageurl TEXT,
-            createdat TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-          )
-        `;
+        console.log('DATABASE_URL exists:', !!process.env.DATABASE_URL);
+        console.log('DATABASE_URL length:', process.env.DATABASE_URL ? process.env.DATABASE_URL.length : 0);
+        
+        try {
+          await sql`
+            CREATE TABLE IF NOT EXISTS certificates (
+              id SERIAL PRIMARY KEY,
+              certificatenumber VARCHAR(100) UNIQUE NOT NULL,
+              gemstonetype VARCHAR(100) NOT NULL,
+              caratweight VARCHAR(50) NOT NULL,
+              color VARCHAR(50) NOT NULL,
+              clarity VARCHAR(50) NOT NULL,
+              cut VARCHAR(100) NOT NULL,
+              polish VARCHAR(50) NOT NULL,
+              symmetry VARCHAR(50) NOT NULL,
+              fluorescence VARCHAR(50) NOT NULL,
+              measurements VARCHAR(100) NOT NULL,
+              origin VARCHAR(100) NOT NULL,
+              issuedate VARCHAR(50) NOT NULL,
+              imageurl TEXT,
+              createdat TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )
+          `;
+          console.log('Table creation completed successfully');
+        } catch (tableError) {
+          console.error('Table creation failed:', tableError);
+          throw tableError;
+        }
 
         // Check if certificate number already exists
         console.log('Checking for existing certificate:', body.certificateNumber);
@@ -438,13 +447,26 @@ const server = http.createServer(async (req, res) => {
   } catch (error) {
     console.error('Unhandled server error:', error);
     console.error('Stack trace:', error.stack);
+    console.error('Request URL:', req.url);
+    console.error('Request method:', req.method);
     try {
       if (!res.headersSent) {
-        res.writeHead(500, { 'Content-Type': 'application/json' });
-        res.end(JSON.stringify({ message: 'Internal server error', error: error.message }));
+        res.setHeader('Access-Control-Allow-Origin', '*');
+        res.setHeader('Content-Type', 'application/json');
+        res.writeHead(500);
+        res.end(JSON.stringify({ 
+          message: 'Internal server error', 
+          error: error.message,
+          url: req.url,
+          method: req.method
+        }));
       }
     } catch (writeError) {
       console.error('Error writing error response:', writeError);
+      if (!res.headersSent) {
+        res.writeHead(500);
+        res.end('Server error');
+      }
     }
   }
 });
