@@ -129,8 +129,8 @@ const server = http.createServer(async (req, res) => {
 
     console.log(`${method} ${pathname}`); // Log all requests
 
-  // API Routes
-  if (pathname.startsWith('/api/certificates/lookup/')) {
+  // API Routes - support both /api/ and /dev-api/ paths
+  if (pathname.startsWith('/api/certificates/lookup/') || pathname.startsWith('/dev-api/certificates/lookup/')) {
     const certNumber = decodeURIComponent(pathname.split('/').pop());
     
     try {
@@ -184,7 +184,7 @@ const server = http.createServer(async (req, res) => {
     return;
   }
 
-  if (pathname === '/api/certificates') {
+  if (pathname === '/api/certificates' || pathname === '/dev-api/certificates') {
     if (method === 'GET') {
       sendJSON(res, certificates);
     } else if (method === 'POST') {
