@@ -1,0 +1,43 @@
+{
+  "version": 2,
+  "functions": {
+    "api/**/*.js": {
+      "runtime": "@vercel/node@18"
+    }
+  },
+  "routes": [
+    {
+      "src": "/api/(.*)",
+      "dest": "/api/$1"
+    },
+    {
+      "src": "/js/(.*)",
+      "dest": "/public/js/$1"
+    },
+    {
+      "src": "/css/(.*)",
+      "dest": "/public/css/$1"
+    },
+    {
+      "src": "/images/(.*)",
+      "dest": "/public/images/$1"
+    },
+    {
+      "src": "/(.*\\.(jpg|jpeg|png|gif|svg|webp|ico|pdf|txt|md|json))$",
+      "dest": "/public/$1"
+    },
+    {
+      "src": "/(logo\\.png|header\\.jpg|gemstone\\.jpg|diamond-sample\\.jpg|ruby-sample\\.jpg|sapphire-sample\\.jpg)$",
+      "dest": "/public/$1"
+    },
+    {
+      "src": "/(upload-certificate|about|certification|contact)/?",
+      "dest": "/public/index.html"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "/public/index.html"
+    }
+  ],
+  "outputDirectory": "public"
+}
