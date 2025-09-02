@@ -1,6 +1,10 @@
 const { neon } = require('@neondatabase/serverless');
 
-// Initialize Neon database connection
+// Initialize Neon database connection using the new production branch approach
+if (!process.env.DATABASE_URL) {
+  throw new Error('DATABASE_URL must be set. Did you forget to provision a database?');
+}
+
 const sql = neon(process.env.DATABASE_URL);
 
 // CORS headers for all responses
@@ -125,18 +129,24 @@ async function initializeDatabase() {
 }
 
 module.exports = async function handler(req, res) {
-  // Handle preflight requests
-  if (req.method === 'OPTIONS') {
-    return res.status(200).json({});
-  }
+  console.log('Vercel function called:', req.method, req.url);
+  console.log('DATABASE_URL exists:', !!process.env.DATABASE_URL);
+  
+  try {
+    // Handle preflight requests
+    if (req.method === 'OPTIONS') {
+      return res.status(200).json({});
+    }
 
-  // Set CORS headers
-  Object.entries(corsHeaders).forEach(([key, value]) => {
-    res.setHeader(key, value);
-  });
+    // Set CORS headers
+    Object.entries(corsHeaders).forEach(([key, value]) => {
+      res.setHeader(key, value);
+    });
 
-  // Auto-initialize database
-  await initializeDatabase();
+    console.log('Initializing database...');
+    // Auto-initialize database
+    await initializeDatabase();
+    console.log('Database initialized');
 
   try {
     if (req.method === 'GET') {
@@ -191,10 +201,17 @@ module.exports = async function handler(req, res) {
 
     return res.status(405).json({ error: 'Method not allowed' });
   } catch (error) {
-    console.error('Database error:', error);
-    return res.status(500).json({ 
-      error: 'Internal server error',
-      message: 'Failed to process certificate request'
-    });
+    console.error('Vercel function error:', error);
+    console.error('Error stack:', error.stack);
+    try {
+      return res.status(500).json({ 
+        error: 'Internal server error',
+        message: 'Failed to process certificate request',
+        details: error.message
+      });
+    } catch (finalError) {
+      console.error('Final catch error:', finalError);
+      return res.status(500).end('Server error occurred');
+    }
   }
 }
